@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ToastProvider } from './components/common/Toast'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import Auth from './pages/Auth'
@@ -14,7 +15,7 @@ import JoinGroup from './components/groups/JoinGroup'
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, pendingOtp } = useAuth()
   
   if (loading) {
     return (
@@ -23,13 +24,16 @@ const ProtectedRoute = ({ children }) => {
       </div>
     )
   }
+  
+  // If OTP is pending, send back to /auth to complete verification
+  if (isAuthenticated && pendingOtp) return <Navigate to="/auth" replace />
   
   return isAuthenticated ? children : <Navigate to="/auth" replace />
 }
 
 // Public Route Component (redirect to dashboard if already authenticated)
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, pendingOtp } = useAuth()
   
   if (loading) {
     return (
@@ -39,13 +43,16 @@ const PublicRoute = ({ children }) => {
     )
   }
   
-  return !isAuthenticated ? children : <Navigate to="/dashboard" replace />
+  // Don't redirect if OTP is still pending — user needs to complete verification
+  // Auth.jsx handles the redirect once isAuthenticated=true and pendingOtp=false
+  return children
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <ToastProvider>
+      <AuthProvider>
+        <Router>
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -117,6 +124,7 @@ function App() {
         </Layout>
       </Router>
     </AuthProvider>
+    </ToastProvider>
   )
 }
 

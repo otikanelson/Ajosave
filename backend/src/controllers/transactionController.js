@@ -3,6 +3,7 @@
 const Transaction = require('../models/Transactions');
 const Wallet = require('../models/Wallets');
 const Group = require('../models/Groups');
+const mongoose = require('mongoose');
 const { asyncErrorHandler, ValidationError, NotFoundError } = require('../middlewares/errorHandler');
 
 /**
@@ -240,7 +241,7 @@ const getTransactionStats = asyncErrorHandler(async (req, res) => {
   try {
     // Aggregate statistics
     const stats = await Transaction.aggregate([
-      { $match: { userId: userId } },
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
           _id: '$type',

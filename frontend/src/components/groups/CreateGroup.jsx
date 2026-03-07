@@ -262,31 +262,34 @@ const CreateGroup = () => {
           <label className="block text-sm font-medium text-deepBlue-700 mb-1">
             Max Members *
           </label>
-          <select
+          <input
+            type="number"
             value={groupData.maxMembers}
-            onChange={(e) => handleInputChange('maxMembers', parseInt(e.target.value))}
+            onChange={(e) => handleInputChange('maxMembers', e.target.value)}
+            placeholder="e.g. 10"
+            min="2"
+            max="100"
             className="w-full px-3 py-2 border border-deepBlue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepBlue-500"
-          >
-            <option value={5}>5 Members</option>
-            <option value={10}>10 Members</option>
-            <option value={15}>15 Members</option>
-            <option value={20}>20 Members</option>
-          </select>
+            required
+          />
+          <p className="text-xs text-deepBlue-500 mt-1">Between 2 and 100 members</p>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-deepBlue-700 mb-1">
-            Duration *
+            Duration (months) *
           </label>
-          <select
+          <input
+            type="number"
             value={groupData.duration}
-            onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
+            onChange={(e) => handleInputChange('duration', e.target.value)}
+            placeholder="e.g. 6"
+            min="1"
+            max="24"
             className="w-full px-3 py-2 border border-deepBlue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepBlue-500"
-          >
-            <option value={3}>3 Months</option>
-            <option value={6}>6 Months</option>
-            <option value={12}>12 Months</option>
-          </select>
+            required
+          />
+          <p className="text-xs text-deepBlue-500 mt-1">1–24 months · Typically 3–12 months</p>
         </div>
       </div>
     </div>
@@ -310,7 +313,7 @@ const CreateGroup = () => {
           <input
             type="number"
             value={groupData.contributionAmount}
-            onChange={(e) => handleInputChange('contributionAmount', parseInt(e.target.value))}
+            onChange={(e) => handleInputChange('contributionAmount', e.target.value)}
             placeholder="1000"
             min="100"
             className="w-full px-3 py-2 border border-deepBlue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepBlue-500"

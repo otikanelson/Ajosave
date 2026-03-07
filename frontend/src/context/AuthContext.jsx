@@ -17,6 +17,8 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Tracks when credentials are verified but OTP hasn't been completed yet
+  const [pendingOtp, setPendingOtp] = useState(false);
 
   /**
    * Initialize authentication state on mount
@@ -39,13 +41,14 @@ export const AuthProvider = ({ children }) => {
       // Try to get current user (will work if valid cookie exists)
       const response = await authService.getCurrentUser();
       
-      if (response.success && response.user) {
-        setUser(response.user);
+      const user = response.data?.user || response.user;
+      if (response.success && user) {
+        setUser(user);
         setIsAuthenticated(true);
-        console.log('✅ User authenticated:', response.user.email);
+        console.log('✅ User authenticated:', user.email);
       }
     } catch (error) {
-      // If error is 401 (unauthorized), user is not logged in - this is expected
+      // 401 = no session, expected for logged-out users — don't log as error
       if (error instanceof APIError && error.statusCode === 401) {
         console.log('ℹ️ No active session found');
       } else {
@@ -68,18 +71,22 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (credentials) => {
     try {
-      setLoading(true);
       setError(null);
-      
       console.log('🔐 Logging in...');
       
       const response = await authService.login(credentials);
       
-      if (response.success && response.user) {
-        setUser(response.user);
+      if (response.data?.requiresOtp) {
+        setPendingOtp(true);
+        return { requiresOtp: true, userId: response.data.userId, phoneNumber: response.data.phoneNumber, devOtp: response.data.devOtp };
+      }
+
+      const user = response.data?.user || response.user;
+      if (response.success && user) {
+        setUser(user);
         setIsAuthenticated(true);
         console.log('✅ Login successful');
-        return { success: true, user: response.user };
+        return { success: true, user };
       } else {
         throw new Error('Invalid response from server');
       }
@@ -88,11 +95,7 @@ export const AuthProvider = ({ children }) => {
       setError(error.message);
       setUser(null);
       setIsAuthenticated(false);
-      
-      // Re-throw error so component can handle it
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -104,18 +107,22 @@ export const AuthProvider = ({ children }) => {
    */
   const signup = async (userData) => {
     try {
-      setLoading(true);
       setError(null);
-      
       console.log('📝 Signing up...');
       
       const response = await authService.register(userData);
       
-      if (response.success && response.user) {
-        setUser(response.user);
+      if (response.data?.requiresOtp) {
+        setPendingOtp(true);
+        return { requiresOtp: true, userId: response.data.userId, phoneNumber: response.data.phoneNumber, devOtp: response.data.devOtp };
+      }
+
+      const user = response.data?.user || response.user;
+      if (response.success && user) {
+        setUser(user);
         setIsAuthenticated(true);
         console.log('✅ Signup successful');
-        return { success: true, user: response.user };
+        return { success: true, user };
       } else {
         throw new Error('Invalid response from server');
       }
@@ -124,12 +131,20 @@ export const AuthProvider = ({ children }) => {
       setError(error.message);
       setUser(null);
       setIsAuthenticated(false);
-      
-      // Re-throw error so component can handle it
       throw error;
-    } finally {
-      setLoading(false);
     }
+  };
+
+  /**
+   * Complete OTP Login
+   * Called after OTP is verified — sets user state and marks as authenticated
+   */
+  const completeOtpLogin = (user, token) => {
+    console.log('✅ completeOtpLogin called, user:', user, 'token present:', !!token);
+    setPendingOtp(false);
+    setUser(user || null);
+    setIsAuthenticated(true);
+    setError(null);
   };
 
   /**
@@ -178,10 +193,11 @@ export const AuthProvider = ({ children }) => {
       
       const response = await authService.verifyUser(verificationData);
       
-      if (response.success && response.user) {
-        setUser(response.user);
+      const user = response.data?.user || response.user;
+      if (response.success && user) {
+        setUser(user);
         console.log('✅ Verification successful');
-        return { success: true, user: response.user };
+        return { success: true, user };
       } else {
         throw new Error('Invalid response from server');
       }
@@ -248,13 +264,15 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     loading,
     error,
+    pendingOtp,
     login,
     signup,
     logout,
     verifyAccount,
     refreshAuth,
     updateUser,
-    clearError
+    clearError,
+    completeOtpLogin
   };
 
   return (

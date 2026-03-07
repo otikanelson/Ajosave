@@ -103,15 +103,13 @@ const logout = async () => {
  */
 const getCurrentUser = async () => {
   try {
-    console.log('👤 Fetching current user');
-    
     const response = await api.get('/auth/me');
-    
-    console.log('✅ User data fetched');
     return response;
-    
   } catch (error) {
-    console.error('❌ Failed to fetch user:', error.message);
+    // Suppress 401 noise — it just means no active session
+    if (error?.statusCode !== 401) {
+      console.error('❌ Failed to fetch user:', error.message);
+    }
     throw error;
   }
 };

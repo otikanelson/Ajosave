@@ -115,6 +115,16 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+
+  isFaceVerified: {
+    type: Boolean,
+    default: false
+  },
+
+  faceVerifiedAt: {
+    type: Date,
+    default: null
+  },
   
   // Account status flags
   isActive: {
@@ -312,6 +322,10 @@ const UserSchema = new mongoose.Schema({
     default: null
   },
 
+  // OTP fields
+  otpCode: { type: String, select: false },
+  otpExpiry: { type: Date, select: false },
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -359,9 +373,7 @@ UserSchema.index({ email: 1, isActive: 1 });
 UserSchema.index({ phoneNumber: 1, isActive: 1 });
 UserSchema.index({ isVerified: 1, isActive: 1 });
 UserSchema.index({ createdAt: -1 });
-
-// Unique indexes with partial filter (ignore null values)
-UserSchema.index({ referralCode: 1 }, { unique: true, sparse: true });
+// Note: referralCode unique index is defined on the field itself (unique: true, sparse: true)
 
 
 UserSchema.virtual('fullName').get(function() {

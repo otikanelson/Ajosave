@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/Users');
-const Wallet = require('../models/Wallets'); // NEW: Import Wallet model
+const Wallet = require('../models/Wallets');
 const config = require('../config/config');
+const { createAndSendOtp, verifyOtp: verifyOtpCode } = require('../services/otpService');
 const {
   AppError,
   ValidationError,
@@ -135,7 +136,7 @@ const registerUser = asyncErrorHandler(async (req, res) => {
   // Normalize email to lowercase
   const normalizedEmail = email.toLowerCase().trim();
 
-  console.log(`🔐 Registration attempt for: ${normalizedEmail}`);
+
 
   try {
     // Check if user already exists
@@ -193,7 +194,7 @@ const registerUser = asyncErrorHandler(async (req, res) => {
     const savedUser = await newUser.save();
 
     // NEW: Create wallet for the user
-    console.log(`💰 Creating wallet for user: ${savedUser._id}`);
+
     const newWallet = new Wallet({
       userId: savedUser._id,
       totalBalance: 0,
@@ -205,22 +206,21 @@ const registerUser = asyncErrorHandler(async (req, res) => {
     });
 
     await newWallet.save();
-    console.log(`✅ Wallet created successfully for user: ${savedUser._id}`);
 
-    // Generate authentication token
-    const token = generateToken(savedUser._id);
 
-    // Set authentication cookie
-    setAuthCookie(res, token);
+    // Send OTP to verify phone number
+    const { devOtp } = await createAndSendOtp(savedUser);
 
-    // Log successful registration
-    console.log(`✅ User registered successfully: ${savedUser._id}`);
 
-    // Send success response
     res.status(201).json({
       success: true,
-      message: 'Registration successful',
-      user: formatUserResponse(savedUser),
+      message: 'Registration successful. Please verify your phone number.',
+      data: {
+        requiresOtp: true,
+        phoneNumber: savedUser.phoneNumber,
+        userId: savedUser._id,
+        ...(process.env.NODE_ENV !== 'production' && { devOtp }),
+      },
       timestamp: new Date().toISOString()
     });
 
@@ -243,7 +243,7 @@ const registerUser = asyncErrorHandler(async (req, res) => {
 const loginUser = asyncErrorHandler(async (req, res) => {
   const { phoneNumber, password } = req.body;
 
-  console.log(`🔐 Login attempt for phone: ${phoneNumber}`);
+
 
   try {
     // Find user by phone number (include password for verification)
@@ -264,7 +264,7 @@ const loginUser = asyncErrorHandler(async (req, res) => {
     // NEW: Check if wallet exists, create if it doesn't
     let wallet = await Wallet.findOne({ userId: user._id });
     if (!wallet) {
-      console.log(`💰 Creating missing wallet for user: ${user._id}`);
+
       wallet = new Wallet({
         userId: user._id,
         totalBalance: 0,
@@ -272,27 +272,26 @@ const loginUser = asyncErrorHandler(async (req, res) => {
         lockedBalance: 0
       });
       await wallet.save();
-      console.log(`✅ Wallet created for user: ${user._id}`);
+
     }
-
-    // Generate authentication token
-    const token = generateToken(user._id);
-
-    // Set authentication cookie
-    setAuthCookie(res, token);
 
     // Update last login time (optional)
     user.lastLoginAt = new Date();
     await user.save();
 
-    // Log successful login
-    console.log(`✅ User logged in successfully: ${user._id}`);
+    // Send OTP for 2FA
+    const { devOtp } = await createAndSendOtp(user);
 
-    // Send success response
+
     res.status(200).json({
       success: true,
-      message: 'Login successful',
-      user: formatUserResponse(user),
+      message: 'Credentials verified. Please enter the OTP sent to your phone.',
+      data: {
+        requiresOtp: true,
+        phoneNumber: user.phoneNumber,
+        userId: user._id,
+        ...(process.env.NODE_ENV !== 'production' && { devOtp }),
+      },
       timestamp: new Date().toISOString()
     });
 
@@ -316,7 +315,7 @@ const verifyUser = asyncErrorHandler(async (req, res) => {
   const { address } = req.body;
   const userId = req.user._id;
 
-  console.log(`🔐 Verification attempt for user: ${userId}`);
+
 
   try {
     // Find user by ID
@@ -331,7 +330,9 @@ const verifyUser = asyncErrorHandler(async (req, res) => {
       return res.status(200).json({
         success: true,
         message: 'User is already verified',
-        user: formatUserResponse(user),
+        data: {
+          user: formatUserResponse(user)
+        },
         timestamp: new Date().toISOString()
       });
     }
@@ -345,13 +346,15 @@ const verifyUser = asyncErrorHandler(async (req, res) => {
     const updatedUser = await user.save();
 
     // Log successful verification
-    console.log(`✅ User verified successfully: ${userId}`);
+
 
     // Send success response
     res.status(200).json({
       success: true,
       message: 'Verification completed successfully',
-      user: formatUserResponse(updatedUser),
+      data: {
+        user: formatUserResponse(updatedUser)
+      },
       timestamp: new Date().toISOString()
     });
 
@@ -374,7 +377,7 @@ const verifyUser = asyncErrorHandler(async (req, res) => {
 const logoutUser = asyncErrorHandler(async (req, res) => {
   const userId = req.user._id;
 
-  console.log(`👋 Logout request for user: ${userId}`);
+
 
   try {
     // Clear authentication cookie
@@ -387,7 +390,7 @@ const logoutUser = asyncErrorHandler(async (req, res) => {
     }
 
     // Log successful logout
-    console.log(`✅ User logged out successfully: ${userId}`);
+
 
     // Send success response
     res.status(200).json({
@@ -432,7 +435,9 @@ const getCurrentUser = asyncErrorHandler(async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'User information retrieved successfully',
-      user: formatUserResponse(user),
+      data: {
+        user: formatUserResponse(user)
+      },
       timestamp: new Date().toISOString()
     });
 
@@ -459,7 +464,7 @@ const refreshToken = asyncErrorHandler(async (req, res) => {
     // Set new authentication cookie
     setAuthCookie(res, newToken);
 
-    console.log(`🔄 Token refreshed for user: ${userId}`);
+
 
     // Send success response
     res.status(200).json({
@@ -474,7 +479,177 @@ const refreshToken = asyncErrorHandler(async (req, res) => {
   }
 });
 
-// Export all controller functions
+/**
+ * Send OTP Handler
+ * @route   POST /api/auth/send-otp
+ * @desc    Send OTP to a user's phone (resend support)
+ * @access  Public
+ */
+const sendOtp = asyncErrorHandler(async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) throw new ValidationError('userId is required');
+
+  const user = await User.findById(userId).select('+otpCode +otpExpiry');
+  if (!user) throw new AuthenticationError('User not found');
+
+  const { devOtp } = await createAndSendOtp(user);
+
+  res.status(200).json({
+    success: true,
+    message: 'OTP sent successfully',
+    data: {
+      phoneNumber: user.phoneNumber,
+      ...(process.env.NODE_ENV !== 'production' && { devOtp }),
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * Verify OTP Handler
+ * @route   POST /api/auth/verify-otp
+ * @desc    Verify OTP and issue JWT (works for both signup and login)
+ * @access  Public
+ */
+const verifyOtpHandler = asyncErrorHandler(async (req, res) => {
+  const { userId, otp } = req.body;
+  if (!userId || !otp) throw new ValidationError('userId and otp are required');
+
+  const user = await User.findById(userId).select('+otpCode +otpExpiry +password');
+  if (!user) throw new AuthenticationError('User not found');
+
+  const valid = await verifyOtpCode(user, otp);
+  if (!valid) throw new AuthenticationError('Invalid or expired OTP');
+
+  // Mark phone as verified
+  if (!user.isPhoneVerified) {
+    user.isPhoneVerified = true;
+    await user.save();
+  }
+
+  // Issue token
+  const token = generateToken(user._id);
+  setAuthCookie(res, token);
+
+
+
+  res.status(200).json({
+    success: true,
+    message: 'OTP verified successfully',
+    data: { user: formatUserResponse(user), token },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * Face Verification Handler
+ * @route   POST /api/auth/verify-face
+ * @desc    Mark user's face as verified (dev: simulated, prod: Persona webhook)
+ * @access  Private
+ */
+const verifyFace = asyncErrorHandler(async (req, res) => {
+  const userId = req.user._id;
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  const user = await User.findById(userId);
+  if (!user) throw new AuthenticationError('User not found');
+
+  if (isDev) {
+    // Dev simulation — mark as verified immediately
+    user.isFaceVerified = true;
+    user.faceVerifiedAt = new Date();
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Face verification successful (simulated)',
+      data: { user: formatUserResponse(user) },
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Production: This endpoint is called by Persona webhook after real verification
+  // The Persona inquiry ID would be validated here
+  const { inquiryId } = req.body;
+  if (!inquiryId) throw new ValidationError('inquiryId is required in production');
+
+  // TODO: Validate inquiryId with Persona API before marking verified
+  user.isFaceVerified = true;
+  user.faceVerifiedAt = new Date();
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Face verification successful',
+    data: { user: formatUserResponse(user) },
+    timestamp: new Date().toISOString(),
+  });
+});
+/**
+ * Forgot Password Handler
+ * @route   POST /api/auth/forgot-password
+ * @desc    Send OTP to user's phone number to initiate password reset
+ * @access  Public
+ */
+const forgotPassword = asyncErrorHandler(async (req, res) => {
+  const { phoneNumber } = req.body;
+  if (!phoneNumber) throw new ValidationError('Phone number is required');
+
+  const user = await User.findOne({ phoneNumber });
+
+  // Always respond with success to prevent phone number enumeration
+  if (!user) {
+    return res.status(200).json({
+      success: true,
+      message: 'If an account with that number exists, an OTP has been sent.',
+      data: {},
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  const { devOtp } = await createAndSendOtp(user);
+
+  res.status(200).json({
+    success: true,
+    message: 'OTP sent to your phone number.',
+    data: {
+      userId: user._id,
+      phoneNumber: user.phoneNumber,
+      ...(process.env.NODE_ENV !== 'production' && { devOtp }),
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * Reset Password Handler
+ * @route   POST /api/auth/reset-password
+ * @desc    Verify OTP and set a new password
+ * @access  Public
+ */
+const resetPassword = asyncErrorHandler(async (req, res) => {
+  const { userId, otp, newPassword } = req.body;
+  if (!userId || !otp || !newPassword) {
+    throw new ValidationError('userId, otp, and newPassword are required');
+  }
+
+  const user = await User.findById(userId).select('+otpCode +otpExpiry +password');
+  if (!user) throw new AuthenticationError('User not found');
+
+  const valid = await verifyOtpCode(user, otp);
+  if (!valid) throw new AuthenticationError('Invalid or expired OTP');
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Password reset successfully. Please log in with your new password.',
+    data: {},
+    timestamp: new Date().toISOString(),
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -482,8 +657,11 @@ module.exports = {
   logoutUser,
   getCurrentUser,
   refreshToken,
-  
-  // Utility functions (for testing or internal use)
+  sendOtp,
+  verifyOtpHandler,
+  verifyFace,
+  forgotPassword,
+  resetPassword,
   generateToken,
   formatUserResponse
 };

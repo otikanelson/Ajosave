@@ -18,21 +18,9 @@ const {
  */
 
 const extractToken = (req) => {
-  let token = null;
-  
-  // 1. First priority: httpOnly cookie (most secure)
-  if (req.cookies && req.cookies.authToken) {
-    token = req.cookies.authToken;
-    console.log('🍪 Token extracted from httpOnly cookie');
-  }
-  
-  // 2. Fallback: Authorization header (for API clients that can't use cookies)
-  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    token = req.headers.authorization.split(' ')[1];
-    console.log('📋 Token extracted from Authorization header');
-  }
-  
-  return token;
+  if (req.cookies?.authToken) return req.cookies.authToken;
+  if (req.headers.authorization?.startsWith('Bearer ')) return req.headers.authorization.split(' ')[1];
+  return null;
 };
 
 /**
@@ -48,17 +36,8 @@ const verifyToken = (token) => {
   try {
     const decoded = jwt.verify(token, config.jwt.secret);
     
-    // Check if token has required fields
     if (!decoded.id) {
       throw new AuthenticationError('Invalid token format');
-    }
-    
-    // Check token age (additional security check)
-    const tokenAge = Date.now() / 1000 - decoded.iat;
-    const maxAge = 24 * 60 * 60; // 24 hours in seconds
-    
-    if (tokenAge > maxAge) {
-      throw new AuthenticationError('Token is too old. Please login again');
     }
     
     return decoded;
@@ -70,7 +49,6 @@ const verifyToken = (token) => {
     } else if (error.name === 'NotBeforeError') {
       throw new AuthenticationError('Token not active yet');
     } else {
-      // Re-throw custom authentication errors
       throw error;
     }
   }
@@ -120,39 +98,16 @@ const loadUser = async (userId) => {
  * @param {Function} next - Express next function
  */
 const protect = asyncErrorHandler(async (req, res, next) => {
-  console.log(`🔐 Authentication check for: ${req.method} ${req.originalUrl}`);
-  
-  // Extract token from request
   const token = extractToken(req);
-  
-  if (!token) {
-    throw new AuthenticationError('Access denied. No authentication token provided');
-  }
-  
+  if (!token) throw new AuthenticationError('Access denied. No authentication token provided');
+
   try {
-    // Verify the token
     const decoded = verifyToken(token);
-    
-    // Load user from database
-    const user = await loadUser(decoded.id);
-    
-    // Attach user to request object for use in route handlers
-    req.user = user;
+    req.user = await loadUser(decoded.id);
     req.tokenDecoded = decoded;
-    
-    console.log(`✅ Authentication successful for user: ${user._id}`);
-    
-    // Proceed to next middleware/route handler
     next();
-    
   } catch (error) {
-    console.error(`❌ Authentication failed for ${req.originalUrl}:`, error.message);
-    
-    // Clear invalid cookie if present
-    if (req.cookies && req.cookies.authToken) {
-      res.clearCookie('authToken');
-    }
-    
+    if (req.cookies?.authToken) res.clearCookie('authToken');
     throw error;
   }
 });
@@ -168,34 +123,16 @@ const protect = asyncErrorHandler(async (req, res, next) => {
  * @param {Function} next - Express next function
  */
 const optionalAuth = asyncErrorHandler(async (req, res, next) => {
-  // Extract token from request
   const token = extractToken(req);
-  
   if (token) {
     try {
-      // Verify the token
       const decoded = verifyToken(token);
-      
-      // Load user from database
-      const user = await loadUser(decoded.id);
-      
-      // Attach user to request object
-      req.user = user;
+      req.user = await loadUser(decoded.id);
       req.tokenDecoded = decoded;
-      
-      console.log(`✅ Optional authentication successful for user: ${user._id}`);
-    } catch (error) {
-      console.warn(`⚠️ Optional authentication failed: ${error.message}`);
-      
-      // Clear invalid cookie if present
-      if (req.cookies && req.cookies.authToken) {
-        res.clearCookie('authToken');
-      }
-      
-      // Don't throw error for optional auth - just continue without user
+    } catch {
+      if (req.cookies?.authToken) res.clearCookie('authToken');
     }
   }
-  
   next();
 });
 
@@ -222,7 +159,6 @@ const authorize = (...roles) => {
       );
     }
     
-    console.log(`✅ Authorization successful for user: ${req.user._id} with role: ${req.user.role}`);
     next();
   };
 };
@@ -256,7 +192,6 @@ const requireVerification = (req, res, next) => {
     });
   }
   
-  console.log(`✅ Verification check passed for user: ${req.user._id}`);
   next();
 };
 

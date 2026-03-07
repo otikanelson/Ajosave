@@ -261,7 +261,7 @@ const Wallet = () => {
         </div>
 
         {/* Wallet Balance Card */}
-        <div className="bg-gradient-to-r from-deepBlue-500 to-purple-600 rounded-2xl p-6 text-white mb-6">
+        <div className="rounded-2xl p-6 text-white mb-6" style={{ backgroundColor: '#0a79f0' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
@@ -275,14 +275,24 @@ const Wallet = () => {
           </div>
 
           {/* Balance Breakdown */}
-          <div className="border-t border-deepBlue-300 pt-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-deepBlue-100">Available</span>
-              <span className="font-semibold">₦{walletData.availableBalance.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-deepBlue-100">Locked (in Groups)</span>
-              <span className="font-semibold">₦{walletData.lockedBalance.toLocaleString()}</span>
+          <div className="border-t border-blue-400 border-opacity-40 pt-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-blue-200">Available</span>
+                <span className="font-semibold">₦{walletData.availableBalance.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-blue-200">Locked</span>
+                <span className="font-semibold">₦{walletData.lockedBalance.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-blue-200">Contributed</span>
+                <span className="font-semibold">₦{walletData.totalContributions.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-blue-200">Received</span>
+                <span className="font-semibold">₦{walletData.totalPayouts.toLocaleString()}</span>
+              </div>
             </div>
           </div>
 

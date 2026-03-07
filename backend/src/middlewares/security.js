@@ -14,8 +14,18 @@ const config = require('../config/config');
  * @returns {Function} CORS middleware
  */
 const configureCors = () => {
+  const allowedOrigins = (config.security.cors.origin || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
+
   return cors({
-    origin: config.security.cors.origin,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: config.security.cors.credentials,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -57,59 +67,15 @@ const configureHelmet = () => {
 };
 
 /**
- * General Rate Limiting
- * 
- * Prevents abuse by limiting the number of requests from a single IP
- * within a specified time window.
- * 
- * @returns {Function} Rate limiting middleware
+ * General Rate Limiting — DISABLED for debugging
  */
-const generalRateLimit = rateLimit({
-  windowMs: config.security.rateLimit.windowMs * 60 * 1000, // Convert minutes to milliseconds
-  max: config.security.rateLimit.max,
-  message: {
-    error: 'Too many requests from this IP',
-    message: `Please try again after ${config.security.rateLimit.windowMs} minutes`,
-    retryAfter: config.security.rateLimit.windowMs * 60
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  // Don't specify keyGenerator - let express-rate-limit use its default
-  // which properly handles both IPv4 and IPv6 addresses
-  skipSuccessfulRequests: false,
-  skipFailedRequests: false
-});
+const generalRateLimit = (req, res, next) => next();
 
 /**
- * Strict Rate Limiting for Authentication Routes
- * 
- * More restrictive rate limiting for sensitive authentication endpoints
- * to prevent brute force attacks.
- * 
- * @returns {Function} Strict rate limiting middleware
+ * Auth Rate Limiting — DISABLED for debugging
+ * Replace with real rateLimit() when ready to re-enable
  */
-const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs for auth routes
-  message: {
-    error: 'Too many authentication attempts',
-    message: 'Please try again after 15 minutes',
-    retryAfter: 15 * 60
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  // Reset count on successful authentication
-  skipSuccessfulRequests: true,
-  // Custom handler for when limit is exceeded
-  handler: (req, res) => {
-    console.warn(`Rate limit exceeded for IP: ${req.ip} on route: ${req.originalUrl}`);
-    res.status(429).json({
-      error: 'Too many authentication attempts',
-      message: 'Please try again after 15 minutes',
-      retryAfter: 15 * 60
-    });
-  }
-});
+const authRateLimit = (req, res, next) => next();
 
 /**
  * Request Logging Middleware
@@ -123,24 +89,11 @@ const authRateLimit = rateLimit({
  */
 const requestLogger = (req, res, next) => {
   const start = Date.now();
-  
-  // Log request in development
-  if (config.server.isDevelopment) {
-    console.log(`${req.method} ${req.originalUrl} - ${req.ip}`);
-  }
-  
-  // Log response time and status when response finishes
   res.on('finish', () => {
-    const duration = Date.now() - start;
-    const logMessage = `${req.method} ${req.originalUrl} - ${res.statusCode} - ${duration}ms`;
-    
     if (res.statusCode >= 400) {
-      console.error(`❌ ${logMessage}`);
-    } else if (config.server.isDevelopment) {
-      console.log(`✅ ${logMessage}`);
+      console.error(`❌ ${req.method} ${req.originalUrl} - ${res.statusCode} - ${Date.now() - start}ms`);
     }
   });
-  
   next();
 };
 
@@ -180,24 +133,11 @@ const additionalSecurityHeaders = (req, res, next) => {
  * @param {Object} app - Express application instance
  */
 const applySecurity = (app) => {
-  console.log('🔒 Applying security middlewares...');
-  
-  // 1. Request logging (should be first to log all requests)
   app.use(requestLogger);
-  
-  // 2. CORS configuration (must be early in the middleware stack)
   app.use(configureCors());
-  
-  // 3. Helmet for security headers
   app.use(configureHelmet());
-  
-  // 4. Additional custom security headers
   app.use(additionalSecurityHeaders);
-  
-  // 5. General rate limiting (applied to all routes)
   app.use(generalRateLimit);
-  
-  console.log('✅ Security middlewares applied successfully');
 };
 
 // Export middlewares and configuration function

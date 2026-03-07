@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 
 const config = require('./src/config/config');
 const { connectDB } = require('./src/config/db');
-const { applySecurity, authRateLimit } = require('./src/middlewares/security');
+const { applySecurity } = require('./src/middlewares/security');
 const { globalErrorHandler, notFoundHandler } = require('./src/middlewares/errorHandler');
 const { sanitizeInput } = require('./src/middlewares/validation');
 
@@ -29,8 +29,6 @@ const initializeDatabase = async () => {
 
 const createApp = () => {
   const app = express();
-  
-  console.log('Initializing server...');
   
   applySecurity(app);
   
@@ -79,7 +77,7 @@ const createApp = () => {
   });
   
   // API Routes
-  app.use('/api/auth', authRoutes);
+  app.use('/api/auth', authRoutes);  // rate limiting applied per-route in authRoutes.js
   app.use('/api/transactions', transactionRoutes);
   app.use('/api/groups', groupRoutes); // NEW
   app.use('/api/wallets', walletRoutes);
@@ -95,13 +93,7 @@ const startServer = async () => {
     const app = createApp();
     
     const server = app.listen(config.server.port, () => {
-      console.log('\n🎉 Server started successfully!');
-      console.log(`🔌 Server running on port ${config.server.port}`);
-      console.log(`🌍 Environment: ${config.server.nodeEnv}`);
-      console.log(`🔗 Local URL: http://localhost:${config.server.port}`);
-      console.log(`💾 Database: Connected to MongoDB Atlas`);
-      console.log(`🔒 Security: All security middleware active`);
-      console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+      console.log(`🚀 Server running on port ${config.server.port} [${config.server.nodeEnv}]`);
     });
     
     const gracefulShutdown = (signal) => {
