@@ -334,6 +334,8 @@ const verifyFunding = asyncErrorHandler(async (req, res) => {
   const userId = req.user._id;
   const { reference } = req.body;
 
+  console.log(`💳 verifyFunding called — userId: ${userId}, reference: ${reference}`);
+
   if (!reference) throw new ValidationError('Payment reference is required');
 
   // Check for duplicate
@@ -354,6 +356,8 @@ const verifyFunding = asyncErrorHandler(async (req, res) => {
     `https://api.paystack.co/transaction/verify/${reference}`,
     { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
   );
+
+  console.log(`💳 Paystack verify response — status: ${response.data.status}, txStatus: ${response.data.data?.status}`);
 
   if (!response.data.status || response.data.data.status !== 'success') {
     throw new ValidationError('Payment verification failed or payment not successful');

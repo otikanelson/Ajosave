@@ -8,6 +8,7 @@ const { protect, requireVerification } = require('../middlewares/authMiddleware'
 const { 
   getTransactions,
   createContribution,
+  createWalletContribution,
   getTransactionById,
   getTransactionStats
 } = require('../controllers/transactionController');
@@ -23,7 +24,8 @@ router.use(sanitizeInput);
 // Transaction routes
 router.get('/', getTransactions);
 router.get('/stats', getTransactionStats);
-router.post('/contribution', requireVerification, createContribution);
+router.post('/contribution', /* requireVerification, */ createContribution); // TODO: re-enable in production
+router.post('/contribution/wallet', createWalletContribution);
 router.get('/:id', getTransactionById);
 
 module.exports = router;

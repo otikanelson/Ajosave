@@ -20,20 +20,34 @@ const configureCors = () => {
     ? []
     : rawOrigin.split(',').map(o => o.trim()).filter(Boolean);
 
+  // Wildcard patterns (e.g. "*.vercel.app") from CORS_ORIGIN_PATTERNS env var
+  const rawPatterns = process.env.CORS_ORIGIN_PATTERNS || '';
+  const originPatterns = rawPatterns
+    .split(',')
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => new RegExp('^' + p.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$'));
+
+  const isOriginAllowed = (origin) => {
+    if (allowedOrigins.includes(origin)) return true;
+    return originPatterns.some(pattern => pattern.test(origin));
+  };
+
   return cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, Postman, curl)
       if (!origin) return callback(null, true);
       // Allow all origins if configured with *
       if (allowAll) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error(`CORS: origin ${origin} not allowed`));
+      if (isOriginAllowed(origin)) return callback(null, true);
+      // Return false (block) instead of throwing — avoids hitting globalErrorHandler
+      return callback(null, false);
     },
     // credentials only makes sense with specific origins, not wildcard
     credentials: !allowAll && config.security.cors.credentials,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 204
   });
 };
 
@@ -139,6 +153,13 @@ const additionalSecurityHeaders = (req, res, next) => {
 const applySecurity = (app) => {
   app.use(requestLogger);
   app.use(configureCors());
+  // Handle preflight requests that were blocked by CORS (origin returned false)
+  app.use((req, res, next) => {
+    if (req.method === 'OPTIONS' && !res.getHeader('Access-Control-Allow-Origin')) {
+      return res.status(403).json({ success: false, message: 'CORS: origin not allowed' });
+    }
+    next();
+  });
   app.use(configureHelmet());
   app.use(additionalSecurityHeaders);
   app.use(generalRateLimit);

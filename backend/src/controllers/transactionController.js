@@ -79,9 +79,9 @@ const createContribution = asyncErrorHandler(async (req, res) => {
       throw new ValidationError('You are not a member of this group');
     }
 
-    // 2. Verify amount matches group contribution
-    if (amount !== group.contributionAmount) {
-      throw new ValidationError('Amount does not match group contribution amount');
+    // 2. Verify amount matches group contribution (use tolerance for float comparison)
+    if (Math.abs(Number(amount) - group.contributionAmount) > 0.01) {
+      throw new ValidationError(`Amount does not match group contribution amount. Expected: ${group.contributionAmount}, Got: ${amount}`);
     }
 
     // 3. Check for duplicate transaction (same reference)
@@ -303,10 +303,89 @@ const getTransactionStats = asyncErrorHandler(async (req, res) => {
   }
 });
 
+/**
+ * Create Wallet Contribution Handler
+ *
+ * @route   POST /api/transactions/contribution/wallet
+ * @desc    Pay group contribution directly from wallet balance
+ * @access  Private
+ */
+const createWalletContribution = asyncErrorHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { groupId, amount } = req.body;
+
+  console.log(`💰 Wallet contribution:`, { userId, groupId, amount });
+
+  const group = await Group.findById(groupId);
+  if (!group) throw new NotFoundError('Group not found');
+
+  if (!group.members.some(m => m.toString() === userId.toString())) {
+    throw new ValidationError('You are not a member of this group');
+  }
+
+  if (Math.abs(Number(amount) - group.contributionAmount) > 0.01) {
+    throw new ValidationError(`Amount does not match group contribution. Expected: ${group.contributionAmount}`);
+  }
+
+  let wallet = await Wallet.findOne({ userId });
+  if (!wallet) throw new NotFoundError('Wallet not found');
+
+  if (wallet.availableBalance < amount) {
+    throw new ValidationError(`Insufficient wallet balance. Available: ₦${wallet.availableBalance.toLocaleString()}`);
+  }
+
+  // Deduct from wallet
+  wallet.availableBalance -= Number(amount);
+  wallet.totalContributions += Number(amount);
+  await wallet.save();
+
+  // Record transaction
+  const transaction = new Transaction({
+    userId,
+    groupId,
+    transactionId: Transaction.generateTransactionId(),
+    type: 'contribution',
+    amount: Number(amount),
+    status: 'completed',
+    description: `Contribution to ${group.name}`,
+    paymentMethod: 'wallet',
+    metadata: { group_name: group.name, frequency: group.frequency },
+    completedAt: new Date()
+  });
+  await transaction.save();
+
+  // Update group pool and member contribution count
+  group.totalPool += Number(amount);
+  const memberIndex = group.membersList?.findIndex(
+    m => m.userId.toString() === userId.toString()
+  );
+  if (memberIndex !== undefined && memberIndex !== -1) {
+    group.membersList[memberIndex].contributionsMade += 1;
+  }
+  await group.save();
+
+  console.log(`✅ Wallet contribution processed: ${transaction.transactionId}`);
+
+  res.status(201).json({
+    success: true,
+    message: 'Contribution processed successfully',
+    data: {
+      transaction,
+      wallet: {
+        availableBalance: wallet.availableBalance,
+        totalContributions: wallet.totalContributions
+      },
+      group: { totalPool: group.totalPool, name: group.name }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Export all controller functions
 module.exports = {
   getTransactions,
   createContribution,
+  createWalletContribution,
   getTransactionById,
   getTransactionStats
 };
