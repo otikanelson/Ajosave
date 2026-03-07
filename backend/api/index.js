@@ -40,9 +40,14 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'API is healthy',
-    database: isConnected ? 'connected' : 'connecting',
+    database: isConnected ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    env: {
+      NODE_ENV: process.env.NODE_ENV || 'NOT SET',
+      MONGO_URI: process.env.MONGO_URI ? 'SET ✓' : 'MISSING ✗',
+      JWT_SECRET: process.env.JWT_SECRET ? 'SET ✓' : 'MISSING ✗',
+    },
   });
 });
 

@@ -1,22 +1,5 @@
-const requiredEnvVars = [
-  'MONGO_URI',
-  'JWT_SECRET'
-];
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 
-/**
- * Validate that all required environment variables are present
- * @throws {Error} If any required environment variable is missing
- */
-const validateEnvVars = () => {
-  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
-  if (missingVars.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missingVars.join(', ')}\n` +
-      'Please check your .env file and ensure all required variables are set.'
-    );
-  }
-};
 
 
 const config = {
@@ -97,24 +80,14 @@ const config = {
 /**
  * Initialize configuration
  * Validates environment variables and returns config object
- * 
- * @returns {Object} Configuration object
- * @throws {Error} If validation fails
  */
 const initializeConfig = () => {
-  try {
-    // Validate required environment variables
-    validateEnvVars();
-    
-    console.log('✅ Environment variables validated successfully');
-    console.log(`🚀 Server will run on port ${config.server.port}`);
-    console.log(`🌍 Environment: ${config.server.nodeEnv}`);
-    
-    return config;
-  } catch (error) {
-    console.error('❌ Configuration Error:', error.message);
-    process.exit(1); // Exit the application if configuration is invalid
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  if (missingVars.length > 0) {
+    console.error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    // Don't process.exit — let the caller handle it (important for serverless)
   }
+  return config;
 };
 
 // Export the initialized configuration
