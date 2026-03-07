@@ -87,7 +87,6 @@ const createAndSendOtp = async (user) => {
   const isDev = process.env.NODE_ENV !== 'production';
 
   if (isDev) {
-    // Dev mode — skip SMS, log to console
     console.log(`\n📱 ========== DEV OTP ==========`);
     console.log(`   Phone : ${user.phoneNumber}`);
     console.log(`   Code  : ${otp}`);
@@ -95,17 +94,19 @@ const createAndSendOtp = async (user) => {
     return { expiry, devOtp: otp };
   }
 
-  // Production — send via Termii (or return OTP if no key configured)
+  // Send via Termii if key is configured
   try {
     const result = await sendOtpSms(user.phoneNumber, otp);
     // If no SMS provider, return OTP so it can be included in API response
     if (result.dev) return { expiry, devOtp: result.otp };
   } catch (smsErr) {
     console.error(`⚠️ SMS delivery failed for ${user.phoneNumber}:`, smsErr.message);
-    throw new Error(`OTP SMS failed: ${smsErr.message}`);
+    // SMS failed — return OTP in response as fallback so auth still works
+    return { expiry, devOtp: otp };
   }
 
-  return { expiry };
+  // Always return devOtp so frontend can autofill (remove when real SMS is active)
+  return { expiry, devOtp: otp };
 };
 
 /**
