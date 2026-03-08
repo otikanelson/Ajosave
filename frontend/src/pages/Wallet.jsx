@@ -9,6 +9,7 @@ import {
 import walletService from '../services/walletServices'
 import { api } from '../services/api'
 import LoadingSpinner from '../components/common/LoadingSpinner'
+import BankAccountModal from '../components/Wallet/BankAccountModal'
 
 const PAYSTACK_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || ''
 
@@ -32,6 +33,7 @@ export default function Wallet() {
   const [showAutoWithdrawalModal, setShowAutoWithdrawalModal] = useState(false)
   const [showFundModal, setShowFundModal] = useState(false)
   const [showLockModal, setShowLockModal] = useState(false)
+  const [showAddBankModal, setShowAddBankModal] = useState(false)
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [withdrawForm, setWithdrawForm] = useState({ bankAccountId: '', amount: '' })
@@ -246,6 +248,12 @@ export default function Wallet() {
 
   return (
     <div className="min-h-screen bg-deepBlue-50">
+      <BankAccountModal
+        isOpen={showAddBankModal}
+        onClose={() => setShowAddBankModal(false)}
+        onSuccess={() => { setShowAddBankModal(false); loadAll() }}
+      />
+
       {/* ── Withdraw Modal ─────────────────────────────────────────────────── */}
       {showWithdrawModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
@@ -501,15 +509,15 @@ export default function Wallet() {
         </div>
 
         {/* Bank Accounts */}
-        <div className="bg-white rounded-2xl shadow-sm border border-deepBlue-100 p-6 mb-6">
+        <div className="p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-deepBlue-800">Bank Accounts</h2>
-            <button onClick={() => navigate('/add-bank-account')} className="text-deepBlue-600 text-sm font-medium flex items-center gap-1">
+            <button onClick={() => setShowAddBankModal(true)} className="text-deepBlue-600 text-sm font-medium flex items-center gap-1">
               <Plus className="w-4 h-4" /> Add
             </button>
           </div>
           {bankAccounts.length === 0 ? (
-            <button onClick={() => navigate('/add-bank-account')}
+            <button onClick={() => setShowAddBankModal(true)}
               className="w-full border-2 border-dashed border-deepBlue-200 rounded-xl p-4 text-deepBlue-500 flex items-center justify-center gap-2 hover:border-deepBlue-400">
               <Plus className="w-5 h-5" /> Add a bank account
             </button>
