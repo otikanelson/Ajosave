@@ -20,26 +20,29 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
   return (
     <>
       {open && <div className="fixed inset-0 bg-black bg-opacity-40 z-40" onClick={onClose} />}
-      <div className={`fixed top-0 left-0 h-screen w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6 pt-16 border-b border-gray-100 flex-shrink-0">
+      <div className={`fixed top-0 left-0 w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`} style={{ height: '100dvh' }}>
+        {/* Header */}
+        <div className="p-5 pt-12 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: '#0a79f0' }}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0" style={{ backgroundColor: '#0a79f0' }}>
               {user?.firstName?.[0]?.toUpperCase() ?? 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-900 truncate">{user?.firstName} {user?.lastName}</p>
+              <p className="font-bold text-gray-900 truncate text-sm">{user?.firstName} {user?.lastName}</p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>
-            <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+            <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 flex-shrink-0">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
-        <nav className="py-2 flex-1 overflow-y-auto">
+
+        {/* Scrollable nav */}
+        <nav className="flex-1 overflow-y-auto py-2">
           {items.map(({ icon: Icon, label, path }) => (
             <button key={label} onClick={() => path ? nav(path) : onClose()}
               className="w-full flex items-center space-x-3 px-5 py-3 hover:bg-gray-50 transition">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#0a79f015' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#0a79f015' }}>
                 <Icon className="w-5 h-5" style={{ color: '#0a79f0' }} />
               </div>
               <span className="flex-1 text-left text-sm font-medium text-gray-800">{label}</span>
@@ -47,13 +50,15 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
             </button>
           ))}
         </nav>
-        <div className="flex-shrink-0 pb-20">
-          <div className="border-t border-gray-100 mx-4" />
-          <button onClick={onLogout} className="w-full flex items-center space-x-3 px-5 py-7 hover:bg-red-50 transition">
-            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+
+        {/* Logout — always visible at bottom */}
+        <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+          <button onClick={onLogout}
+            className="w-full flex items-center space-x-3 px-5 py-4 hover:bg-red-50 transition">
+            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
               <LogOut className="w-5 h-5 text-red-500" />
             </div>
-            <span className="flex-1 text-left text-sm font-medium text-red-500">Log Out</span>
+            <span className="text-sm font-medium text-red-500">Log Out</span>
           </button>
         </div>
       </div>
