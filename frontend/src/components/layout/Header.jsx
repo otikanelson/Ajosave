@@ -20,7 +20,10 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
   return (
     <>
       {open && <div className="fixed inset-0 bg-black bg-opacity-40 z-40" onClick={onClose} />}
-      <div className={`fixed top-0 left-0 w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 overflow-y-auto ${open ? 'translate-x-0' : '-translate-x-full'}`} style={{ height: '100dvh' }}>
+      <div
+        className={`fixed top-0 left-0 w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 overflow-y-auto ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ top: 0, bottom: '64px' }}
+      >
         {/* Header */}
         <div className="p-5 pt-12 border-b border-gray-100">
           <div className="flex items-center space-x-3">
@@ -52,7 +55,7 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
         </nav>
 
         {/* Logout */}
-        <div className="border-t border-gray-100 pb-10">
+        <div className="border-t border-gray-100 py-8">
           <button onClick={onLogout}
             className="w-full flex items-center space-x-3 px-5 py-4 hover:bg-red-50 transition">
             <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
