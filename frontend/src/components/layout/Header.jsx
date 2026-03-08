@@ -20,9 +20,9 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
   return (
     <>
       {open && <div className="fixed inset-0 bg-black bg-opacity-40 z-40" onClick={onClose} />}
-      <div className={`fixed top-0 left-0 w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`} style={{ height: '100dvh' }}>
+      <div className={`fixed top-0 left-0 w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 overflow-y-auto ${open ? 'translate-x-0' : '-translate-x-full'}`} style={{ height: '100dvh' }}>
         {/* Header */}
-        <div className="p-5 pt-12 border-b border-gray-100 flex-shrink-0">
+        <div className="p-5 pt-12 border-b border-gray-100">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0" style={{ backgroundColor: '#0a79f0' }}>
               {user?.firstName?.[0]?.toUpperCase() ?? 'U'}
@@ -37,8 +37,8 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
           </div>
         </div>
 
-        {/* Scrollable nav */}
-        <nav className="flex-1 overflow-y-auto py-2">
+        {/* Nav items */}
+        <nav className="py-2">
           {items.map(({ icon: Icon, label, path }) => (
             <button key={label} onClick={() => path ? nav(path) : onClose()}
               className="w-full flex items-center space-x-3 px-5 py-3 hover:bg-gray-50 transition">
@@ -51,8 +51,8 @@ const SettingsSidebar = ({ open, onClose, user, onLogout }) => {
           ))}
         </nav>
 
-        {/* Logout — always visible at bottom */}
-        <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+        {/* Logout */}
+        <div className="border-t border-gray-100 pb-10">
           <button onClick={onLogout}
             className="w-full flex items-center space-x-3 px-5 py-4 hover:bg-red-50 transition">
             <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
