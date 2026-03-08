@@ -509,8 +509,8 @@ export default function Wallet() {
         </div>
 
         {/* Bank Accounts */}
-        <div className="p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4 px-4">
             <h2 className="text-lg font-semibold text-deepBlue-800">Bank Accounts</h2>
             <button onClick={() => setShowAddBankModal(true)} className="text-deepBlue-600 text-sm font-medium flex items-center gap-1">
               <Plus className="w-4 h-4" /> Add
@@ -518,11 +518,11 @@ export default function Wallet() {
           </div>
           {bankAccounts.length === 0 ? (
             <button onClick={() => setShowAddBankModal(true)}
-              className="w-full border-2 border-dashed border-deepBlue-200 rounded-xl p-4 text-deepBlue-500 flex items-center justify-center gap-2 hover:border-deepBlue-400">
+              className="mx-4 w-[calc(100%-2rem)] border-2 border-dashed border-deepBlue-200 rounded-xl p-4 text-deepBlue-500 flex items-center justify-center gap-2 hover:border-deepBlue-400">
               <Plus className="w-5 h-5" /> Add a bank account
             </button>
           ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <div className="flex gap-3 overflow-x-auto pb-2 px-4">
               {bankAccounts.map(acc => (
                 <div key={acc._id} className="min-w-[180px] rounded-xl p-4 text-white relative flex-shrink-0" style={{ backgroundColor: '#0a79f0' }}>
                   {acc.isPrimary && (
