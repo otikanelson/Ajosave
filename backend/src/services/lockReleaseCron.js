@@ -21,6 +21,12 @@ const startLockReleaseCron = () => {
 
       for (const lock of expiredLocks) {
         try {
+          // Validate lock has required fields
+          if (!lock.userId || !lock.amount) {
+            console.warn(`⚠️ Skipping invalid lock ${lock._id}: missing userId or amount`);
+            continue;
+          }
+
           const wallet = await Wallet.findOne({ userId: lock.userId });
           if (!wallet) {
             console.error(`❌ Wallet not found for lock ${lock._id}`);

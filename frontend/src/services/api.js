@@ -15,10 +15,14 @@
 
 // Base API URL - configure based on environment
 // In Vite, environment variables must start with VITE_
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const PRIMARY_API_URL = import.meta.env.VITE_API_PRIMARY_URL || 'http://localhost:5000/api';
+const FALLBACK_API_URL = import.meta.env.VITE_API_FALLBACK_URL || 'https://ajosave-backend.vercel.app/api';
+
+let API_BASE_URL = PRIMARY_API_URL;
 
 // Log the API URL on startup for debugging
-console.log('🔗 API Base URL:', API_BASE_URL);
+console.log('🔗 Primary API URL:', PRIMARY_API_URL);
+console.log('🔗 Fallback API URL:', FALLBACK_API_URL);
 
 /**
  * API Error Class
@@ -45,75 +49,101 @@ class APIError extends Error {
  * @throws {APIError} If request fails
  */
 const makeRequest = async (endpoint, options = {}) => {
-  try {
-    // Construct full URL
-    const url = `${API_BASE_URL}${endpoint}`;
-    // Default headers
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-
-    // Inject JWT token from localStorage if present
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
-    
-    // Merge options with defaults
-    const config = {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-      // No credentials: 'include' — we use Bearer tokens, not cookies
-    };
-    
-    // Log request in development
-    if (import.meta.env.DEV) {
-      console.log(`🌐 API Request: ${options.method || 'GET'} ${endpoint}`);
-    }
-    
-    // Make the request
-    const response = await fetch(url, config);
-    
-    // Parse JSON response
-    let data;
+  const attemptRequest = async (baseUrl) => {
     try {
-      data = await response.json();
-    } catch (parseError) {
-      // If response is not JSON, create error
-      throw new APIError(
-        'Invalid response from server',
-        response.status
-      );
-    }
-    
-    // Check if request was successful
-    if (!response.ok) {
-      // Extract error message and validation errors
-      const errorMessage = data.message || 'An error occurred';
-      const validationErrors = data.errors || null;
+      // Construct full URL
+      const url = `${baseUrl}${endpoint}`;
+      // Default headers
+      const defaultHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      // Inject JWT token from localStorage if present
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+      }
       
-      throw new APIError(errorMessage, response.status, validationErrors);
-    }
-    
-    // Log success in development
-    if (import.meta.env.DEV) {
-      console.log(`✅ API Success: ${options.method || 'GET'} ${endpoint}`);
-    }
-    
-    return data;
-    
-  } catch (error) {
-    // Network error or other non-API errors
-    if (error instanceof APIError) {
+      // Merge options with defaults
+      const config = {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...options.headers,
+        },
+      };
+      
+      // Log request in development
+      if (import.meta.env.DEV) {
+        console.log(`🌐 API Request: ${options.method || 'GET'} ${endpoint} (${baseUrl})`);
+      }
+      
+      // Make the request with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const response = await fetch(url, { ...config, signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      // Parse JSON response
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new APIError('Invalid response from server', response.status);
+      }
+      
+      // Check if request was successful
+      if (!response.ok) {
+        const errorMessage = data.message || 'An error occurred';
+        const validationErrors = data.errors || null;
+        throw new APIError(errorMessage, response.status, validationErrors);
+      }
+      
+      // Log success in development
+      if (import.meta.env.DEV) {
+        console.log(`✅ API Success: ${options.method || 'GET'} ${endpoint}`);
+      }
+      
+      // Update API_BASE_URL if using fallback
+      if (baseUrl === FALLBACK_API_URL && API_BASE_URL !== FALLBACK_API_URL) {
+        console.log('📡 Switched to fallback API URL');
+        API_BASE_URL = FALLBACK_API_URL;
+      }
+      
+      return data;
+    } catch (error) {
       throw error;
     }
+  };
+
+  try {
+    // Try primary URL first
+    return await attemptRequest(API_BASE_URL);
+  } catch (primaryError) {
+    // If primary fails and it's not the fallback, try fallback
+    if (API_BASE_URL !== FALLBACK_API_URL) {
+      try {
+        console.warn('⚠️ Primary API failed, trying fallback...');
+        return await attemptRequest(FALLBACK_API_URL);
+      } catch (fallbackError) {
+        // Both failed, throw the fallback error
+        if (fallbackError instanceof APIError) {
+          throw fallbackError;
+        }
+        throw new APIError(
+          'Unable to connect. Please check your internet connection.',
+          0
+        );
+      }
+    }
     
-    // Network error
-    console.error('Network Error:', error);
+    // Primary error and already using fallback
+    if (primaryError instanceof APIError) {
+      throw primaryError;
+    }
+    
     throw new APIError(
       'Network error. Please check your internet connection.',
       0
