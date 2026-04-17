@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import logo from '../../assets/images/logo.JPG';
+import logo from '../../assets/images/logo.png';
 
 const HomeNavbar = () => {
   const navigate = useNavigate();

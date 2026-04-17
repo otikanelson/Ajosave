@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, X, XCircle, XIcon } from 'lucide-react';
-import logo from '../../assets/images/logo.JPG';
+import logo from '../../assets/images/logo.png';
 
 const HomeFooter = () => {
   const navigate = useNavigate();

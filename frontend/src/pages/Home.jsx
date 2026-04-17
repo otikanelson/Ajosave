@@ -4,7 +4,7 @@ import { Shield, Users, TrendingUp, ArrowRight, CheckCircle, Star, Play } from '
 import { useAuth } from '../context/AuthContext'
 import HomeNavbar from '../components/layout/HomeNavbar'
 import HomeFooter from '../components/layout/HomeFooter'
-import logo from '../assets/images/logo.JPG'
+import logo from '../assets/images/logo.png'
 import heroImage from '../assets/images/vitaly-gariev-uFF_apyZ-l8-unsplash.jpg'
 
 const Home = () => {
