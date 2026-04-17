@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./mobile/assets/images/icon.png" alt="AjoSave Logo" width="120" height="120">
+  <img src="https://github.com/user-attachments/assets/ac47224c-df10-41b4-8890-3f54730b96be" alt="AjoSave Logo" width="120" height="120">
   
   # AjoSave
   
@@ -21,15 +21,16 @@
 ## 📱 Screenshots
 
 <div align="center">
-  <img src="./images/AjoMobile_3.png" alt="Welcome Screen" width="200">
-  <img src="./images/AjoMobile_4.png" alt="Dashboard" width="200">
-  <img src="./images/AjoMobile_5.png" alt="Groups" width="200">
-  <img src="./images/AjoMobile_7.png" alt="Wallet" width="200">
+  <img src="https://github.com/user-attachments/assets/f6178035-4a92-4ca5-9de1-6d63374eea56" alt="Welcome Screen" width="200">
+  <img src="https://github.com/user-attachments/assets/3289c817-cf06-49ef-8ec5-bd1b74f89708" alt="Login" width="200">
+  <img src="https://github.com/user-attachments/assets/146f8456-f0bf-48f1-8f75-9c7b49004a33" alt="Dashboard" width="200">
+  <img src="https://github.com/user-attachments/assets/df3a23fa-6379-41ee-a8b0-8a179ef9c04f" alt="Groups" width="200">
 </div>
 
 <div align="center">
-  <img src="./images/Ajosave_1.png" alt="Web Dashboard" width="400">
-  <img src="./images/Ajosave_2.png" alt="Web Features" width="400">
+  <img src="https://github.com/user-attachments/assets/76dd4370-71b3-475d-8726-62f21cba8a36" alt="Payment" width="200">
+  <img src="https://github.com/user-attachments/assets/da2d2548-6659-43e3-8626-466ba5771363" alt="Wallet" width="200">
+  <img src="https://github.com/user-attachments/assets/4512b735-a334-4d14-840e-c400c20bea86" alt="Transactions" width="200">
 </div>
 
 ---
