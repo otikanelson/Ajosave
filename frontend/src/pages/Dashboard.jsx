@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
   Users, Calendar, Plus, CreditCard,
-  Wallet, Building2, List, BarChart2, LogIn,
+  Wallet, Building2, List, MessageCircle, LogIn,
   ArrowDown, ArrowUp, Bell, EyeOff, Eye,
 } from 'lucide-react'
 import groupService from '../services/groupServices'
@@ -78,7 +78,7 @@ const Dashboard = () => {
     { icon: Building2, label: 'Add Bank', onClick: () => navigate('/wallet') },
     { icon: Users, label: 'My Groups', onClick: () => navigate('/groups') },
     { icon: List, label: 'Transactions', onClick: () => navigate('/wallet') },
-    { icon: BarChart2, label: 'Analytics', onClick: () => {} },
+    { icon: MessageCircle, label: 'Group Chat', onClick: () => navigate('/chats') },
   ]
 
   if (authLoading || loading) {
@@ -138,7 +138,6 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm border-t border-blue-400 border-opacity-40 pt-3">
             {[
-              { label: 'Available', key: 'availableBalance' },
               { label: 'Locked', key: 'lockedBalance' },
               { label: 'Contributed', key: 'totalContributions' },
               { label: 'Received', key: 'totalPayouts' },

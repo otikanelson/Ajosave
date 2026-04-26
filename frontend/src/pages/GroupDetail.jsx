@@ -18,7 +18,8 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   Banknote,
-  RefreshCw
+  RefreshCw,
+  MessageCircle
 } from 'lucide-react'
 import groupService from '../services/groupServices'
 import { api } from '../services/api'
@@ -303,6 +304,13 @@ const GroupDetail = () => {
           >
             History
           </button>
+          <button
+            onClick={() => navigate(`/groups/${id}/chat`)}
+            className="flex-1 py-2 px-4 rounded-md font-medium transition text-deepBlue-600 hover:bg-deepBlue-50 flex items-center justify-center gap-1.5"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Chat
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -376,29 +384,6 @@ const GroupDetail = () => {
                 {group.maxMembers - group.currentTurn} turns remaining until cycle completion
               </p>
             </div>
-
-            {/* Actions */}
-            {group.status === 'active' && (
-              <div className="bg-white rounded-2xl shadow-sm border border-deepBlue-100 p-6">
-                <h2 className="text-lg font-semibold text-deepBlue-800 mb-4">Quick Actions</h2>
-                <div className="space-y-3">
-                  <button
-                    onClick={() => navigate('/payment')}
-                    className="w-full bg-deepBlue-600 text-white py-3 rounded-xl font-semibold hover:bg-deepBlue-700 transition flex items-center justify-center space-x-2"
-                  >
-                    <DollarSign className="w-5 h-5" />
-                    <span>Make Contribution</span>
-                  </button>
-                  {isAdmin && (
-                    <button
-                      className="w-full border-2 border-deepBlue-600 text-deepBlue-600 py-3 rounded-xl font-semibold hover:bg-deepBlue-50 transition"
-                    >
-                      Process Payout
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

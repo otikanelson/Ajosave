@@ -12,6 +12,8 @@ const {
   verifyFace,
   forgotPassword,
   resetPassword,
+  verifyBvnHandler,
+  verifyNinHandler,
 } = require('../controllers/authController');
 
 const { protect, requireVerification } = require('../middlewares/authMiddleware');
@@ -29,6 +31,10 @@ router.post('/send-otp', sendOtp);
 router.post('/verify-otp', verifyOtpHandler);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+
+// Verification routes
+router.post('/verify-bvn', verifyBvnHandler);
+router.post('/verify-nin', verifyNinHandler);
 
 // Non-sensitive routes — no auth rate limit
 router.put('/verify', protect, validateVerification, verifyUser);

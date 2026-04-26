@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, Users, Calendar, Clock, CheckCircle, Copy, Share2 } from 'lucide-react'
+import { ArrowLeft, Plus, Users, Calendar, Clock, CheckCircle, Copy, Share2, MessageCircle } from 'lucide-react'
 import groupService from '../services/groupServices'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 
@@ -167,6 +167,18 @@ const Groups = () => {
           <span className="font-medium">{new Date(group.nextPayout).toLocaleDateString()}</span>
         </div>
       )}
+
+      {/* Chat Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          navigate(`/groups/${group._id}/chat`)
+        }}
+        className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-deepBlue-600 text-deepBlue-600 rounded-lg font-semibold hover:bg-deepBlue-50 transition"
+      >
+        <MessageCircle className="w-4 h-4" />
+        Group Chat
+      </button>
     </div>
   )
 

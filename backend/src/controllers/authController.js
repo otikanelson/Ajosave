@@ -3,6 +3,7 @@ const User = require('../models/Users');
 const Wallet = require('../models/Wallets');
 const config = require('../config/config');
 const { createAndSendOtp, verifyOtp: verifyOtpCode } = require('../services/otpService');
+const { verifyBVN, verifyNIN } = require('../services/paystackVerification');
 const {
   AppError,
   ValidationError,
@@ -650,6 +651,61 @@ const resetPassword = asyncErrorHandler(async (req, res) => {
   });
 });
 
+/**
+ * Verify BVN Handler
+ * @route   POST /api/auth/verify-bvn
+ * @desc    Verify BVN using Paystack API
+ * @access  Public
+ */
+const verifyBvnHandler = asyncErrorHandler(async (req, res) => {
+  const { bvn } = req.body;
+  if (!bvn || bvn.length !== 11) {
+    throw new ValidationError('BVN must be 11 digits');
+  }
+
+  const result = await verifyBVN(bvn);
+
+  if (!result.verified) {
+    throw new ValidationError('BVN verification failed: ' + result.message);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'BVN verified successfully',
+    data: result.data,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * Verify NIN Handler
+ * @route   POST /api/auth/verify-nin
+ * @desc    Verify NIN using Paystack API
+ * @access  Public
+ */
+const verifyNinHandler = asyncErrorHandler(async (req, res) => {
+  const { nin, dateOfBirth } = req.body;
+  if (!nin || nin.length !== 11) {
+    throw new ValidationError('NIN must be 11 digits');
+  }
+  if (!dateOfBirth) {
+    throw new ValidationError('Date of birth is required');
+  }
+
+  const result = await verifyNIN(nin, dateOfBirth);
+
+  if (!result.verified) {
+    throw new ValidationError('NIN verification failed: ' + result.message);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'NIN verified successfully',
+    data: result.data,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -662,6 +718,8 @@ module.exports = {
   verifyFace,
   forgotPassword,
   resetPassword,
+  verifyBvnHandler,
+  verifyNinHandler,
   generateToken,
   formatUserResponse
 };

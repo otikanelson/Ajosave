@@ -17,8 +17,21 @@ const transactionRoutes = require('./src/routes/transactionRoutes');
 const groupRoutes = require('./src/routes/groupRoutes');
 const walletRoutes = require('./src/routes/walletRoutes');
 
-// Import cron jobs
+// Import admin routes
+const adminAuthRoutes = require('./src/routes/adminAuthRoutes');
+const adminDashboardRoutes = require('./src/routes/adminDashboardRoutes');
+const adminUserRoutes = require('./src/routes/adminUserRoutes');
+const adminGroupRoutes = require('./src/routes/adminGroupRoutes');
+const adminTransactionRoutes = require('./src/routes/adminTransactionRoutes');
+const adminAuditRoutes = require('./src/routes/adminAuditRoutes');
+const adminAnalyticsRoutes = require('./src/routes/adminAnalyticsRoutes');
+const adminSupportRoutes = require('./src/routes/adminSupportRoutes');
+const adminSettingsRoutes = require('./src/routes/adminSettingsRoutes');
+const adminBulkRoutes = require('./src/routes/adminBulkRoutes');
+
+// Import cron jobs and services
 const { startLockReleaseCron } = require('./src/services/lockReleaseCron');
+const { initializeSettings } = require('./src/services/settingsInit');
 const initializeDatabase = async () => {
   try {
     await connectDB();
@@ -83,6 +96,18 @@ const createApp = () => {
   app.use('/api/transactions', transactionRoutes);
   app.use('/api/groups', groupRoutes); // NEW
   app.use('/api/wallets', walletRoutes);
+
+  // Admin API Routes
+  app.use('/api/admin/auth', adminAuthRoutes);
+  app.use('/api/admin/dashboard', adminDashboardRoutes);
+  app.use('/api/admin/users', adminUserRoutes);
+  app.use('/api/admin/groups', adminGroupRoutes);
+  app.use('/api/admin/transactions', adminTransactionRoutes);
+  app.use('/api/admin/audit-logs', adminAuditRoutes);
+  app.use('/api/admin/analytics', adminAnalyticsRoutes);
+  app.use('/api/admin/support-tickets', adminSupportRoutes);
+  app.use('/api/admin/settings', adminSettingsRoutes);
+  app.use('/api/admin/bulk', adminBulkRoutes);
   app.use(notFoundHandler);
   app.use(globalErrorHandler);
   
@@ -92,6 +117,7 @@ const createApp = () => {
 const startServer = async () => {
   try {
     await initializeDatabase();
+    await initializeSettings();
     const app = createApp();
     
     const server = app.listen(config.server.port, () => {

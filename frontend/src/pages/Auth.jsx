@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Login from '../components/auth/Login'
-import Signup from '../components/auth/Signup'
+import SignupSteps from '../components/auth/SignupSteps'
 import { ArrowLeft } from 'lucide-react'
 
 const Auth = () => {
@@ -66,7 +66,7 @@ const Auth = () => {
           {activeTab === 'login' ? (
             <Login />
           ) : (
-            <Signup />
+            <SignupSteps />
           )}
         </div>
       </div>

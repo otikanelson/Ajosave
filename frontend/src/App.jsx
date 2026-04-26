@@ -26,6 +26,8 @@ import Payment from './pages/Payment'
 import Wallet from './pages/Wallet'
 import CreateGroup from './components/groups/CreateGroup'
 import JoinGroup from './components/groups/JoinGroup'
+import GroupChat from './pages/GroupChat'
+import GroupChats from './pages/GroupChats'
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -146,6 +148,26 @@ const AppContent = () => {
             <ProtectedRoute>
               <Layout>
                 <JoinGroup />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/chats" 
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <GroupChats />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/groups/:id/chat" 
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <GroupChat />
               </Layout>
             </ProtectedRoute>
           } 
