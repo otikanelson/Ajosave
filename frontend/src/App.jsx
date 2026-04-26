@@ -13,6 +13,11 @@ import HowItWorks from './pages/HowItWorks'
 import Contact from './pages/Contact'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
+import RefundPolicy from './pages/RefundPolicy'
+import HelpCenter from './pages/HelpCenter'
+import Security from './pages/Security'
+import TrustSafety from './pages/TrustSafety'
+import CommunityGuidelines from './pages/CommunityGuidelines'
 import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
 import Groups from './pages/Groups'
@@ -78,6 +83,11 @@ const AppContent = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/security" element={<Security />} />
+        <Route path="/trust-safety" element={<TrustSafety />} />
+        <Route path="/community-guidelines" element={<CommunityGuidelines />} />
         <Route 
           path="/auth" 
           element={

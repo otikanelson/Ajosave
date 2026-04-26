@@ -36,21 +36,21 @@ const Home = () => {
   const testimonials = [
     {
       name: "Adunni O.",
-      text: "AjoSave helped me save ₦500,000 in 6 months. The group system keeps me accountable!",
+      text: "The AjoSave Plaftorm hsa helped me save ₦500,000 in 6 months. The group system keeps me accountable!",
       rating: 5,
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face"
-    },
-    {
-      name: "Chidi M.",
-      text: "Finally, a digital ajo that I can trust. Transparent and secure.",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
+      image: "https://atodmagazine.com/wp-content/uploads/2021/02/Nigeria-1050x700.jpg"
     },
     {
       name: "Fatima A.",
+      text: "Finally, A completely transparent and secure way to do group Ajo savings.",
+      rating: 5,
+      image: "https://www.nairaland.com/attachments/5371101_powedelawrence2_jpeg1362db864dd226c579514032448f5f8f"
+    },
+    {
+      name: "Chidi M.",
       text: "The best way to save with friends and family. Highly recommended!",
       rating: 5,
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face"
+      image: "https://media.istockphoto.com/id/517302398/photo/portrait-of-nigerian-man-with-beard-looking-at-camera.jpg?s=612x612&w=0&k=20&c=BC5pdsmTWzmFO3mIlA7TQAIECnJ7Kpd-daL6G4RJqT4="
 }
   ]
 
@@ -118,14 +118,6 @@ const Home = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <img 
-                  src={logo} 
-                  alt="AjoSave Logo" 
-                  className="w-16 h-16 object-contain drop-shadow-lg"
-                />
-                <span className="text-2xl font-bold text-deepBlue-800">AjoSave</span>
-              </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-deepBlue-800 mb-6 leading-tight">
                 Your Money's

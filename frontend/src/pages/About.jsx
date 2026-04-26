@@ -39,22 +39,28 @@ const About = () => {
 
   const team = [
     {
-      name: "Adebayo Johnson",
-      role: "CEO & Co-Founder",
-      image: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=400&h=400&fit=crop&crop=face",
+      name: "Olanase Umar Ayobami",
+      role: "CEO & Founder",
+      image: "https://media.licdn.com/dms/image/v2/D4E03AQFrS8pO9mQreg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1730359211431?e=1778716800&v=beta&t=WchPt4K2E4cYcVCn44KnwHZCaoZeFgH_H7TdZaNjHls",
       bio: "Former Goldman Sachs analyst with 10+ years in fintech"
     },
     {
-      name: "Kemi Oladele",
-      role: "CTO & Co-Founder", 
-      image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop&crop=face",
-      bio: "Ex-Google engineer passionate about financial inclusion"
+      name: "OluwaFeranmi Adeyemo",
+      role: "Head of Operations",
+      image: "https://media.licdn.com/dms/image/v2/D4E12AQGjj1e1guW_Tg/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1682254771737?e=2147483647&v=beta&t=CRdK6YIxlq6jeIfjPN2bSwuwskJIDCeoeRo3M5M0Vao",
+      bio: "Operations expert with deep knowledge of Nigerian financial systems"
     },
     {
-      name: "Chidi Okwu",
-      role: "Head of Operations",
-      image: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=400&fit=crop&crop=face",
-      bio: "Operations expert with deep knowledge of Nigerian financial systems"
+      name: "Code circle foundation",
+      role: "Head of Development",
+      image: "https://codecircle.com.ng/logo2.png",
+      bio: "Co-developement process specialist and backend security expert"
+    },
+    {
+      name: "Otika Nelson Somtochukwu",
+      role: "Chief Technical Manager",
+      image: "https://media.licdn.com/dms/image/v2/D4E03AQEwJVzp2GuFng/profile-displayphoto-scale_400_400/B4EZ3CDeuuIAAg-/0/1777077186386?e=1778716800&v=beta&t=5I9Bu_QLtorJHco7fx7JYTnyMP2q2dMQYhTfc3qoXE4",
+      bio: "Technical developments expert with gross knowledge on Mobile processes and systems"
     }
   ];
 
@@ -91,7 +97,7 @@ const About = () => {
             </div>
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&h=400&fit=crop" 
+                src="https://plus.unsplash.com/premium_photo-1733317391601-b1651d6d4be9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTN8fGZpbnRlY2h8ZW58MHx8MHx8fDA%3D" 
                 alt="Team collaboration" 
                 className="rounded-xl shadow-lg w-full h-80 object-cover"
               />
@@ -149,7 +155,7 @@ const About = () => {
           <h2 className="text-3xl font-bold text-center text-deepBlue-800 mb-12">
             Meet Our Team
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-4 gap-8">
             {team.map((member, index) => (
               <div key={index} className="text-center">
                 <img 

@@ -1,22 +1,25 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, X, XCircle, XIcon } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import logo from '../../assets/images/logo.png';
 
 const HomeFooter = () => {
   const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
 
   const footerLinks = {
     company: [
       { label: 'About Us', path: '/about' },
       { label: 'How It Works', path: '/how-it-works' },
       { label: 'Contact Us', path: '/contact' },
-      { label: 'Careers', path: '/careers' }
     ],
     legal: [
       { label: 'Privacy Policy', path: '/privacy-policy' },
       { label: 'Terms & Conditions', path: '/terms-conditions' },
-      { label: 'Cookie Policy', path: '/cookie-policy' },
       { label: 'Refund Policy', path: '/refund-policy' }
     ],
     support: [
@@ -78,7 +81,7 @@ const HomeFooter = () => {
               {footerLinks.company.map((link) => (
                 <li key={link.path}>
                   <button
-                    onClick={() => navigate(link.path)}
+                    onClick={() => handleNavigation(link.path)}
                     className="text-deepBlue-200 hover:text-white transition-colors text-left"
                   >
                     {link.label}
@@ -95,7 +98,7 @@ const HomeFooter = () => {
               {footerLinks.legal.map((link) => (
                 <li key={link.path}>
                   <button
-                    onClick={() => navigate(link.path)}
+                    onClick={() => handleNavigation(link.path)}
                     className="text-deepBlue-200 hover:text-white transition-colors text-left"
                   >
                     {link.label}
@@ -112,7 +115,7 @@ const HomeFooter = () => {
               {footerLinks.support.map((link) => (
                 <li key={link.path}>
                   <button
-                    onClick={() => navigate(link.path)}
+                    onClick={() => handleNavigation(link.path)}
                     className="text-deepBlue-200 hover:text-white transition-colors text-left"
                   >
                     {link.label}

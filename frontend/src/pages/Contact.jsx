@@ -242,7 +242,7 @@ const Contact = () => {
             {/* Office Image */}
             <div className="rounded-xl overflow-hidden shadow-lg">
               <img 
-                src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&h=300&fit=crop" 
+                src="https://plus.unsplash.com/premium_photo-1661963781048-9780e4ecae5b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Y29vcGVyYXRlJTIwb2ZmaWNlfGVufDB8fDB8fHww" 
                 alt="AjoSave Office" 
                 className="w-full h-48 object-cover"
               />
