@@ -2,8 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "env": {
-    "VITE_API_URL": "@vite_api_url",
-    "VITE_ADMIN_SUBDOMAIN": "@vite_admin_subdomain"
+    "VITE_API_URL": "@VITE_API_URL",
+    "VITE_ADMIN_SUBDOMAIN": "@VITE_ADMIN_SUBDOMAIN"
   },
   "routes": [
     {
