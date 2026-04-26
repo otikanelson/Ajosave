@@ -28,6 +28,7 @@ const adminAnalyticsRoutes = require('./src/routes/adminAnalyticsRoutes');
 const adminSupportRoutes = require('./src/routes/adminSupportRoutes');
 const adminSettingsRoutes = require('./src/routes/adminSettingsRoutes');
 const adminBulkRoutes = require('./src/routes/adminBulkRoutes');
+const adminExportRoutes = require('./src/routes/adminExportRoutes');
 
 // Import cron jobs and services
 const { startLockReleaseCron } = require('./src/services/lockReleaseCron');
@@ -108,6 +109,7 @@ const createApp = () => {
   app.use('/api/admin/support-tickets', adminSupportRoutes);
   app.use('/api/admin/settings', adminSettingsRoutes);
   app.use('/api/admin/bulk', adminBulkRoutes);
+  app.use('/api/admin/export', adminExportRoutes);
   app.use(notFoundHandler);
   app.use(globalErrorHandler);
   

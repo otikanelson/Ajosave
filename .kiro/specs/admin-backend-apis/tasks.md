@@ -84,12 +84,12 @@ This document outlines all implementation tasks for the admin backend APIs. Task
   - [x] 11.4 Register settings routes in `backend/server.js` under `/api/admin/settings`.
   - [x] 11.5 Create a settings seed script or initialization function in `backend/src/services/settingsInit.js` that inserts default settings if none exist: `maxGroupSize` (50), `minContributionAmount` (100), `maxContributionAmount` (1000000), `maxTransactionAmount` (5000000), `maxWithdrawalAmount` (2000000), `kycRequired` (true), `maintenanceMode` (false).
 
-- [ ] 12. Implement bulk operations API
-  - [ ] 12.1 Create `backend/src/controllers/adminBulkController.js` with `bulkUserAction` handler: accept `{ action: 'suspend'|'activate'|'deactivate', userIds: string[], reason?: string }` in request body, validate userIds array (max 1000), process each userId sequentially or in batches of 50, track `{ successful: [], failed: [] }` results, create individual audit log entries for each successful operation, return summary `{ successful: number, failed: number, errors: [{ id, reason }] }`.
-  - [ ] 12.2 Create `backend/src/routes/adminBulkRoutes.js` with: `POST /users` (bulkUserAction). Route protected with `adminProtect`.
-  - [ ] 12.3 Register bulk routes in `backend/server.js` under `/api/admin/bulk`.
+- [x] 12. Implement bulk operations API
+  - [x] 12.1 Create `backend/src/controllers/adminBulkController.js` with `bulkUserAction` handler: accept `{ action: 'suspend'|'activate'|'deactivate', userIds: string[], reason?: string }` in request body, validate userIds array (max 1000), process each userId sequentially or in batches of 50, track `{ successful: [], failed: [] }` results, create individual audit log entries for each successful operation, return summary `{ successful: number, failed: number, errors: [{ id, reason }] }`.
+  - [x] 12.2 Create `backend/src/routes/adminBulkRoutes.js` with: `POST /users` (bulkUserAction). Route protected with `adminProtect`.
+  - [x] 12.3 Register bulk routes in `backend/server.js` under `/api/admin/bulk`.
 
-- [ ] 13. Implement export and reporting API
+- [-] 13. Implement export and reporting API
   - [ ] 13.1 Create `backend/src/controllers/adminExportController.js` with `exportUsers` handler: query users with optional filters (same as getUsers), convert to CSV format using manual string building (no external library needed), set response headers `Content-Type: text/csv` and `Content-Disposition: attachment; filename=users-export.csv`, stream CSV data. Exclude sensitive fields (bvn, nin, password).
   - [ ] 13.2 Add `exportTransactions` handler: query transactions with optional filters (same as getTransactions), convert to CSV and stream response.
   - [ ] 13.3 Add `exportAuditLogs` handler: query audit logs with optional filters, convert to CSV and stream response.
