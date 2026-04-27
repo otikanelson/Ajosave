@@ -6,10 +6,6 @@
       "source": "/assets/(.*)",
       "headers": [
         {
-          "key": "Content-Type",
-          "value": "application/javascript"
-        },
-        {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
         }
@@ -27,11 +23,15 @@
   ],
   "routes": [
     {
-      "src": "^/admin/.*",
-      "dest": "/index.html"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "src": "^/.*",
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/(.*)",
       "dest": "/index.html"   
     }
   ]
